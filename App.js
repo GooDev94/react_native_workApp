@@ -1,18 +1,53 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight,TouchableWithoutFeedback, Pressable} from 'react-native';
+import { useState } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, TouchableHighlight,TouchableWithoutFeedback, Pressable, TextInput} from 'react-native';
+import { theme } from './colors';
 
 export default function App() {
+  const [working, setWorking] = useState(true);
+  const [text, setText] = useState("");
+  const [toDos, setToDos] = useState({}); //hashmap을 만들 예정으로 object로 진행
+  const travel = () => setWorking(false);
+  const work = () => setWorking(true);
+  const onChnageText = (payload) => setText(payload);
+  const addToDo = () => {
+    //텍스트가 비었는지 확인
+    if(text == ""){
+        return
+    }
+
+    //save to do
+    //기존의 toDos와 새로운 ToDos를 결합하기 위해 Object.assign를 사용하였고 Date.now()를 사용하여 현재 date를 key로 사용함
+    const newToDos = Object.assign(
+                                    {}, 
+                                    toDos, 
+                                    {[Date.now()] : {text, work: working}}
+                                  )
+    setToDos(newToDos);
+    setText("");
+  }
+
+  console.log(toDos);
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       <View style={styles.header}>
-        <TouchableOpacity activeOpacity={0}>
-          <Text style={styles.btnText}>Work</Text>
+        <TouchableOpacity onPress={work}>
+          <Text style={{...styles.btnText, color: working ? "white" : theme.grey}}>Work</Text>
         </TouchableOpacity>
-        <TouchableWithoutFeedback  
-          onPress={() => console.log("pressed")}>
-          <Text style={styles.btnText}>Travel</Text>
-        </TouchableWithoutFeedback >
+        <TouchableOpacity  onPress={travel}>
+          <Text style={{...styles.btnText, color: !working ? "white" : theme.grey}}>Travel</Text>
+        </TouchableOpacity >        
+      </View>
+      <View>
+          <TextInput 
+            onSubmitEditing={addToDo}
+            onChangeText={onChnageText}
+            returnKeyType='done'
+            value={text}
+            placeholder={working ? "Add a To Do" : "Where do you want to go?"} 
+            style={styles.input}
+          />
       </View>
     </View>
   );
@@ -31,8 +66,16 @@ const styles = StyleSheet.create({
     marginTop: 100
   },
   btnText:{
-    color: "grey",
+    color: "white",
     fontSize: 40,
     fontWeight: "600"
+  },
+  input:{
+    backgroundColor: "white",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    marginTop: 20,
+    fontSize: 15
   }
 });
